@@ -26,7 +26,7 @@ public class BinaryTree {
         while (head != null){
             BinaryTreeNode parent = queue.peek();
             BinaryTreeNode pop = queue.poll();
-            System.out.println(" ======= "+pop.data);
+            //System.out.println(" ======= "+pop.data);
             BinaryTreeNode leftChild = null, rightChild = null;
             leftChild = new BinaryTreeNode(head.data);
             queue.add(leftChild);
@@ -96,6 +96,40 @@ public class BinaryTree {
         return ans;
     }
 
+    public static BinaryTreeNode buildTree(ArrayList<Integer> inorder, ArrayList<Integer> postorder) {
+        if (inorder == null || postorder == null || inorder.size() == 0 || inorder.size() != postorder.size())
+            return null;
+        BinaryTreeNode root;
+        int n = inorder.size();
+        root = rec(inorder, postorder, 0, n - 1, n - 1);
+        return root;
+    }
+
+    public static BinaryTreeNode rec(ArrayList<Integer> inorder, ArrayList<Integer> postorder, int start, int end, int postIndex) {
+        if (start > end)
+            return null;
+        BinaryTreeNode node;
+        int nodeVal = postorder.get(postIndex);
+        node = new BinaryTreeNode(nodeVal);
+        int i;
+        for (i = start; i <= end; i++) {
+            if (inorder.get(i) == nodeVal)
+                break;
+        }
+        int count = end - i + 1;
+        node.left = rec(inorder, postorder, start, i - 1, postIndex - count);
+        node.right = rec(inorder, postorder, i + 1, end, postIndex - 1);
+        return node;
+    }
+
+    public static void printFlattenTree(BinaryTreeNode root) {
+        if (root == null) {
+            return;
+        }
+        System.out.print(root.data + " ");
+        printFlattenTree(root.right);
+    }
+
     public static ArrayList<Integer> postOrderTraversalItr(BinaryTreeNode node1){
         Stack<BinaryTreeNode> stack1 = new Stack();
         Stack<BinaryTreeNode> stack2 = new Stack();
@@ -122,12 +156,47 @@ public class BinaryTree {
 
     public static void postOrderTraversal(BinaryTreeNode node) {
         if (node != null) {
-            inorderTraversal(node.left);
-            inorderTraversal(node.right);
+            postOrderTraversal(node.left);
+            postOrderTraversal(node.right);
             System.out.print(node.data + " ");
-
         }
     }
+
+
+    //============================
+
+    ArrayList < Integer > preorder, inorder;
+    public BinaryTreeNode buildTreePreIn(ArrayList < Integer > preorder, ArrayList < Integer > inorder) {
+        if (preorder == null || inorder == null || preorder.size() == 0 || inorder.size() == 0)
+            return null;
+
+        if (preorder.size() != inorder.size())
+            return null;
+
+        this.preorder = preorder;
+        this.inorder = inorder;
+        return rec(0, preorder.size() - 1, 0);
+
+    }
+
+    private BinaryTreeNode rec(int start, int end, int index) {
+        if (start > end)
+            return null;
+
+        BinaryTreeNode root = new BinaryTreeNode(preorder.get(index));
+        int i = start;
+
+        for (; i <= end; i++) {
+            if (inorder.get(i).intValue() == root.data)
+                break;
+        }
+
+        root.left = rec(start, i - 1, index + 1);
+        root.right = rec(i + 1, end, index + i - start + 1);
+        return root;
+    }
+
+    //=========================================
     public static void main(String[] args) {
         BinaryTree tree = new BinaryTree();
         tree.push(36);
@@ -137,10 +206,6 @@ public class BinaryTree {
         tree.push(12);
         tree.push(10);
         BinaryTreeNode node = tree.convertList2Binary(tree.root);
-        ArrayList<Integer> preorderTraversalItr = preorderTraversalItr(node);
-        for(Integer i : preorderTraversalItr)
-            System.out.print(i+" ");
-        System.out.println();
         System.out.println("=== Preorder Traversal ===");
         preorderTraversal(node);
 
@@ -149,12 +214,47 @@ public class BinaryTree {
         System.out.println("=== Inorder Traversal ===");
         inorderTraversal(node);
         System.out.println();
+        ArrayList<Integer> preorderTraversalItr = preorderTraversalItr(node);
+        for(Integer i : preorderTraversalItr)
+            System.out.print(i+" ");
+        System.out.println();
         System.out.println("=== Inorder Traversal Iterative ===");
-        ArrayList<Integer> list = itrInorderTraversal(node);
-        for(Integer i : list)
+        ArrayList<Integer> inorderList = itrInorderTraversal(node);
+        for(Integer i : inorderList)
             System.out.print(i+" ");
         System.out.println();
         System.out.println("=== Postorder Traversal ===");
         postOrderTraversal(node);
+        System.out.println();
+        ArrayList<Integer> postOrderList = postOrderTraversalItr(node);
+        for(Integer i : postOrderList)
+            System.out.print(i+" ");
+        System.out.println();
+        System.out.println("== Build tree from Inorder and PostOrder Traversal ==");
+        BinaryTreeNode binaryTreeNode = buildTree(inorderList, postOrderList);
+        flatten(binaryTreeNode);
+        printFlattenTree(binaryTreeNode);
+
+        System.out.println();
+        System.out.println("== Build tree from Inorder and PostOrder Traversal ==");
+        BinaryTreeNode preInorder = tree.buildTreePreIn(preorderTraversalItr, inorderList);
+        flatten(preInorder);
+        printFlattenTree(preInorder);
+    }
+
+    public static  void flatten(BinaryTreeNode root) {
+        BinaryTreeNode curr = root;
+        while (curr != null) {
+            if (curr.left != null) {
+                BinaryTreeNode pre = curr.left;
+                while (pre.right != null) {
+                    pre = pre.right;
+                }
+                pre.right = curr.right;
+                curr.right = curr.left;
+                curr.left = null;
+            }
+            curr = curr.right;
+        }
     }
 }

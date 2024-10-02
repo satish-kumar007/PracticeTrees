@@ -1,9 +1,9 @@
 package tree1;
 
-class ListNode{
-    int data;
-    ListNode next;
-    ListNode(int d){
+public class ListNode{
+    public int data;
+    public ListNode next;
+    public ListNode(int d){
         data = d;
         next = null;
     }
